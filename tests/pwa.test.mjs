@@ -1,0 +1,8 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+function worker(online=true){const handlers={},writes=[];const offline=new Response('reconnect');const cache={add:async url=>writes.push(url),match:async()=>offline};vm.runInNewContext(readFileSync('public/sw.js','utf8'),{self:{addEventListener:(key,fn)=>handlers[key]=fn,location:{origin:'https://app.test'},clients:{claim:async()=>{}}},caches:{open:async()=>cache,keys:async()=>[]},fetch:async()=>{if(!online)throw Error('offline');return new Response('private response');},URL,Response});return {handlers,writes};}
+test('worker pre-caches only the public offline page',async()=>{const {handlers,writes}=worker();let task;handlers.install({waitUntil:p=>task=p});await task;assert.deepEqual(writes,['/offline.html']);});
+test('online account navigations use network without writing cache',async()=>{const {handlers,writes}=worker();let task;handlers.fetch({request:{url:'https://app.test/dashboard',method:'GET',mode:'navigate'},respondWith:p=>task=p});assert.equal(await (await task).text(),'private response');assert.deepEqual(writes,[]);});
+test('offline navigations show reconnect; API calls and mutations are untouched',async()=>{const {handlers}=worker(false);let task;handlers.fetch({request:{url:'https://app.test/dashboard',method:'GET',mode:'navigate'},respondWith:p=>task=p});assert.equal(await (await task).text(),'reconnect');for(const request of [{url:'https://app.test/login',method:'POST',mode:'navigate'},{url:'https://app.test/api/private',method:'GET',mode:'cors'},{url:'https://other.test',method:'GET',mode:'navigate'}])handlers.fetch({request,respondWith:()=>assert.fail('intercepted sensitive request')});});

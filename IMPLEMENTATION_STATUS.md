@@ -88,3 +88,25 @@ Supabase is waiting at its sign-in page in the connected browser. After access i
 `gobuildabiz.com` is not currently connected to this Vercel project; domain ownership and DNS configuration remain unverified. Do not purchase a domain or claim it is live without authorization and verification.
 
 Once these live gates pass, merge/release the tested code, deploy the production target, verify the real public and authenticated flows, and only then mark Verified in Production. Stripe activation remains a separate future billing task.
+
+## Latest live-setup handoff
+Supabase sign-in is now available. The organization contains one unrelated paused project, FinDeck; it was not modified. The new-project form is prepared for Build A Biz with Data API enabled, automatic table exposure disabled, and automatic RLS enabled. The project has not been created: the user must enter/generate the database password and submit the form under browser credential rules. The prepared Supabase tab is left open. No live migrations, service-key transfers, or production application release have occurred.
+
+## Live configuration update after explicit approval
+- User explicitly approved the seven migrations and Vercel Preview/Production configuration.
+- Applied all seven migrations in a single committed transaction to project rskfzdnfpurfrooyjajj.
+- Live SQL verification: 32 public application tables, 32 RLS-protected tables, 51 public policies.
+- Saved separate Preview/Production encryption keys and tracking salts, Supabase URL/publishable key, and site URLs. No private secret values are recorded here.
+- Connected preview deployment dpl_46wr4d2rA9GUUYa9esKhLzyXtmKX is READY; live marketplace read succeeded against the real database.
+- Production site URL is https://buildabiz.vercel.app while gobuildabiz.com remains unconnected. Supabase Site URL and exact production/preview callback allowlist are saved.
+- NEW confirmed release blocker: Supabase custom SMTP is not configured. Its dashboard requires custom SMTP to edit verification/reset email templates. Live signup/recovery/admin acceptance remains unverified; email verification was not disabled to bypass this.
+- SMTP settings are open for user-provided sender/provider credentials. Production application release remains pending this email gate. Earlier secret-approval and Supabase-sign-in blockers are resolved.
+
+## Production release requested with existing limitations
+User explicitly requested deploying the current setup after choosing to defer SMTP and domain purchase. PR #1 was merged to main with commit 4e38d8234396f9635b5a1169d3e2e227f336264a. Vercel automatically started production deployment dpl_4UCxjE5XyFEGWcX7hg1d218DMcyn for https://buildabiz.vercel.app. Email verification/reset delivery, SMTP sender setup, custom domain, and live authenticated/admin acceptance remain unverified and are not represented as complete. Public production smoke verification is in progress.
+
+### Production deployment confirmed
+Production deployment dpl_4UCxjE5XyFEGWcX7hg1d218DMcyn completed successfully for merged commit 4e38d8234396f9635b5a1169d3e2e227f336264a. https://buildabiz.vercel.app renders the actual branded homepage, and an unauthenticated /dashboard request was observed redirecting to /login. Public homepage rendering and protected-route behavior are Verified in Production. SMTP/email delivery, signed-in workflows, paid billing and gobuildabiz.com remain unverified or unconfigured; their statuses are not upgraded by this deployment.
+
+## Installable app — 2026-11-11
+Status: Ready for Testing. Implemented manifest, 192/512 PNG icons plus Apple 180 icon, standalone launch, browser installation guide, install prompt and offline reconnect screen. Added service-worker behavioral tests: public-only pre-cache, online private navigation without cache writes, offline fallback, mutations/API/cross-origin bypass. Executed: ESLint passed, production build passed including TypeScript, 26 tests passed with no skips. No migrations or new environment variables. Production delivery and actual device install validation pending. Login investigation: tperry09@gmail.com exists, is email-confirmed and has super_admin; DB auth-rate function succeeds. Actual password sign-in failure remains unresolved.
