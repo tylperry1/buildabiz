@@ -1,11 +1,15 @@
 -- Disposable test fixtures only; always rolled back.
 begin;
-insert into auth.users(id,email) values ('11111111-1111-4111-8111-111111111111','workflow@example.invalid');
+insert into auth.users(id,email) values ('11111111-1111-4111-8111-111111111111','workflow@example.invalid'),('22222222-2222-4222-8222-222222222222','other@example.invalid');
+insert into public.businesses(id,owner_id,name) values('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','22222222-2222-4222-8222-222222222222','Other private business');
+insert into storage.objects(bucket_id,name) values('business-documents','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/private.pdf');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $$ declare bid uuid;details jsonb;begin
  details:='{"name":"Workflow test","state":"Ohio","business_type":"Services","structure":"LLC","industry":"Software","formation_status":"Idea","budget":"Under $500","website":"","goals":"Test persistence"}';
  bid:=public.save_business_workspace(null,details,2,false,array[]::text[]);
+ insert into storage.objects(bucket_id,name) values('business-documents',bid::text||'/own.pdf');
+ if (select count(*) from storage.objects)<>1 then raise exception 'Storage isolation failed';end if;
  if (select current_step from public.startup_wizard_sessions where business_id=bid)<>2 then raise exception 'Wizard save failed';end if;
  perform public.save_business_workspace(bid,details,3,true,array['First task','Second task']);
  update public.checklist_tasks set completed=true where business_id=bid and title='First task';
