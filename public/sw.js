@@ -1,5 +1,5 @@
 // Only cache the public offline document. Never cache account pages or API responses.
-const CACHE = 'bab-offline-v1';
+const CACHE = 'bab-offline-v2';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.add('/offline.html')));
 });
@@ -8,5 +8,6 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || event.request.mode !== 'navigate' || new URL(event.request.url).origin !== self.location.origin) return;
-  event.respondWith(fetch(event.request).catch(() => caches.open(CACHE).then(cache => cache.match('/offline.html')).then(response => response || Response.error())));
+  const offline = () => caches.open(CACHE).then(cache => cache.match('/offline.html')).then(response => response || Response.error());
+  event.respondWith(self.navigator?.onLine === false ? offline() : fetch(event.request).catch(offline));
 });

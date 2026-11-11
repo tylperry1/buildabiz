@@ -6,5 +6,5 @@ test('install manifest and icons are valid and the worker reconnects offline',as
  await page.goto('/install');await expect(page.getByRole('heading',{name:'iPhone & iPad'})).toBeVisible();
  await page.evaluate(async()=>{await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));});
  await context.setOffline(true);
- try{await page.goto('/dashboard');await expect(page.getByRole('heading',{name:'Let’s reconnect.'})).toBeVisible();}finally{await context.setOffline(false);}
+ try{await page.goto('/dashboard');await expect(page.getByRole('heading',{name:'Let’s reconnect.'}),await page.locator('body').innerText()).toBeVisible();}finally{await context.setOffline(false);}
 });
