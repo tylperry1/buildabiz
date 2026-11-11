@@ -1,0 +1,62 @@
+name: Build A Biz verification
+on:
+  push:
+    branches: [main, codex/complete-platform]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  application:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+      - name: Install pinned browser test runner
+        run: npm install --no-save --package-lock=false --ignore-scripts @playwright/test@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Verify desktop and mobile public flows
+        run: npx playwright test
+  database:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: disposable-ci-password
+          POSTGRES_DB: buildabiz_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: disposable-ci-password
+      PGDATABASE: buildabiz_test
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Apply Supabase contracts and application migrations
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/bootstrap.sql
+          for migration in supabase/migrations/*.sql; do
+            psql -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Verify two-user row isolation and role boundaries
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/isolation.sql
+      - name: Verify transactional workflow, catalog, storage and affiliate behavior
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/workflows.sql

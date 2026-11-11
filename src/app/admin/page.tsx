@@ -1,0 +1,5 @@
+import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
+import { db } from "@/lib/supabase/server";
+export default async function Admin() { await requireAdmin(); const counts = await db("rpc/admin_summary",{method:"POST",body:"{}"});
+    return <><div className="eyebrow">BUILD A BIZ · CONTROL CENTER</div><h1 style={{ fontSize: 40 }}>A clear view of your platform.</h1><div className="stats">{[["Users", counts.users], ["Businesses", counts.businesses], ["Providers", counts.providers]].map(([title, count]) => <div className="panel" key={title}><span>{title}</span><strong>{count}</strong></div>)}</div><div className="panel"><h2>Build the marketplace</h2><p>Add categories, providers, products, plans, and verified pricing. No invented catalog data is published.</p><Link className="button" href="/admin/providers">Manage providers</Link></div><p className="notice">Billing is not active. Integration status reflects administrator records and must only be updated after a verified connection.</p></>; }

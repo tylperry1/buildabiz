@@ -1,0 +1,2 @@
+import type { MetadataRoute } from "next";
+export default function sitemap(): MetadataRoute.Sitemap { const base = process.env.NEXT_PUBLIC_SITE_URL || "https://gobuildabiz.com"; return ["", "/start-business", "/formation", "/compare", "/compare/domains", "/compare/hosting", "/compare/email", "/compare/formation", "/business-credit", "/tools", "/resources", "/pricing", "/about", "/contact"].map(path => ({ url: `${base}${path}` })); }

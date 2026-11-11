@@ -1,0 +1,10 @@
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {z} from "zod";
+import {requireUser} from "@/lib/auth";
+import {db} from "@/lib/supabase/server";
+import {publicPlans,referralMap} from "@/lib/marketplace";
+import {ComparisonTable} from "@/components/comparison-table";
+import {SubmitButton} from "@/components/submit-button";
+import {workspaceWrite} from "@/app/actions";
+export default async function Page({params}:{params:Promise<{id:string}>}){const user=await requireUser();const parsed=z.string().uuid().safeParse((await params).id);if(!parsed.success)notFound();const row=(await db(`saved_comparisons?id=eq.${parsed.data}&user_id=eq.${user.id}`))[0];if(!row)notFound();const [plans,referrals]=await Promise.all([publicPlans(row.plan_ids),referralMap()]);return <><Link className="text-link" href="/dashboard/comparisons">← Saved comparisons</Link><h1 className="small-heading">{row.name}</h1><p className="muted">These are current verified terms, which may have changed since you saved this shortlist.</p>{plans.length<row.plan_ids.length&&<p className="notice">Some saved plans are no longer available.</p>}{plans.length>0?<ComparisonTable plans={plans} referrals={referrals}/>:<p className="empty">The saved plans are no longer published.</p>}<form action={workspaceWrite} className="form panel"><input type="hidden" name="kind" value="comparison"/><input type="hidden" name="id" value={row.id}/><label>Comparison name<input name="name" required maxLength={150} defaultValue={row.name}/></label><SubmitButton className="button">Rename comparison</SubmitButton></form><details className="panel"><summary>Remove this saved comparison</summary><form action={workspaceWrite} className="form"><input type="hidden" name="kind" value="comparison"/><input type="hidden" name="id" value={row.id}/><input type="hidden" name="operation" value="delete"/><label className="toggle-label"><input type="checkbox" required/>I want to remove this shortlist.</label><SubmitButton className="button secondary">Delete saved comparison</SubmitButton></form></details></>;}

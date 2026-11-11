@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {encryptCredential,decryptCredential} from '../src/lib/credentials.mjs';
+const key='a'.repeat(64);
+test('credentials round-trip with randomized nonces, never plaintext ciphertext',()=>{const first=encryptCredential('test-private-api-key',key,'integration-a'),second=encryptCredential('test-private-api-key',key,'integration-a');assert.notEqual(first.ciphertext,second.ciphertext);assert(!JSON.stringify(first).includes('test-private-api-key'));assert.equal(decryptCredential(first,key,'integration-a'),'test-private-api-key');});
+test('tampering, wrong encryption key and cross-integration replay are rejected',()=>{const sealed=encryptCredential('test-private-api-key',key,'integration-a');assert.throws(()=>decryptCredential({...sealed,tag:'0'.repeat(32)},key,'integration-a'));assert.throws(()=>decryptCredential(sealed,'b'.repeat(64),'integration-a'));assert.throws(()=>decryptCredential(sealed,key,'integration-b'));});
+test('missing or malformed server encryption keys fail closed',()=>{for(const value of [undefined,'public-value','0'.repeat(63)])assert.throws(()=>encryptCredential('secret',value,'integration-a'),/not configured/);});
