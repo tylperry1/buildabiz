@@ -27,3 +27,6 @@ Auth throttling uses a database window keyed by hashed email, supplemented by Su
 ## Sources consulted
 - https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - https://supabase.com/docs/guides/auth/server-side/advanced-guide
+
+## Installable web application
+The root layout registers a same-origin service worker and links the manifest. `/install` offers browser-specific instructions and a native install prompt when supported. `/icons/{180,192,512}` generates PNG icons. The service worker pre-caches only `/offline.html`; network-first navigations fall back to it on connectivity failure. No authenticated HTML, API responses, actions or credentials are cached. `/sw.js` is served without HTTP caching. No app store account or new paid service is required.

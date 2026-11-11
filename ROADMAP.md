@@ -31,3 +31,7 @@ Code commit e29bc2599157d5d31b146aaaf8fe70fb12499e2e passes CI: 23 unit/render/c
 
 ## Production instruction
 The user has authorized production deployment once completion gates pass. Release is blocked until Supabase access/live flows and explicit approval for server encryption/tracking secret provisioning are available. Custom-domain ownership/DNS also needs verification.
+
+## Installable application
+- Completed: web app manifest, PNG icons, standalone launch, installation guide and private-data-safe offline fallback; local build/lint and 26 tests passed.
+- Ready for Testing: deployed installation on actual iOS/Android devices.
