@@ -46,4 +46,19 @@ do $$ begin
  if (select count(*) from public.referral_events)<>0 then raise exception 'Click fabricated a conversion';end if;
  if (select count(*) from public.price_verification_history)<>1 then raise exception 'Price verification snapshot missing';end if;
 end $$;
+insert into public.notifications(user_id,title) values('22222222-2222-4222-8222-222222222222','Private notification');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+do $$ begin
+ if (select count(*) from public.integration_credentials)<>0 then raise exception 'Credential isolation failed';end if;
+ begin
+  insert into public.subscription_entitlements(user_id,tier,status,stripe_subscription_id) values(auth.uid(),'plus','active','forged');raise exception 'Paid entitlement escalation allowed';
+ exception when insufficient_privilege then null;end;
+ begin
+  update public.notifications set title='Tampered';raise exception 'Notification content mutation allowed';
+ exception when insufficient_privilege then null;end;
+ update public.notifications set read_at=now() where user_id=auth.uid();
+ if not found then raise exception 'Notification read-state update failed';end if;
+end $$;
+reset role;
 rollback;

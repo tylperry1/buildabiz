@@ -16,11 +16,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Repair cross-platform native package metadata
-        run: |
-          rm package-lock.json
-          npm install --package-lock-only --ignore-scripts
-          node -e 'const s=Buffer.from(require("fs").readFileSync("package-lock.json")).toString("base64");for(let n=0;n<s.length;n+=12000)console.log("LOCKFILE:"+s.slice(n,n+12000))'
       - run: npm ci
       - run: npm run lint
       - run: npm run build
