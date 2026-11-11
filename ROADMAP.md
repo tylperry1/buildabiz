@@ -35,3 +35,5 @@ The user has authorized production deployment once completion gates pass. Releas
 ## Installable application
 - Completed: web app manifest, PNG icons, standalone launch, installation guide and private-data-safe offline fallback; local build/lint and 26 tests passed.
 - Ready for Testing: deployed installation on actual iOS/Android devices.
+
+Installable application release: Completed on main, code `4e19a6d`; production install assets verified by HTTP and desktop/mobile browser automation passed. Physical-device installation remains Ready for Testing.
