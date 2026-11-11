@@ -2,7 +2,7 @@
 Start Smart. Build Confidently.
 
 ## Local setup
-Requires Node.js 22 or later.
+Requires Node.js 22.x (LTS).
 
 ```sh
 npm ci
