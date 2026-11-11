@@ -1,0 +1,5 @@
+import {requireUser} from "@/lib/auth";
+import {db} from "@/lib/supabase/server";
+import {workspaceWrite} from "@/app/actions";
+import {SubmitButton} from "@/components/submit-button";
+export default async function Page(){const user=await requireUser();const rows:{id:string;title:string;read_at:string|null;created_at:string}[]=await db(`notifications?user_id=eq.${user.id}&order=created_at.desc&limit=100`);return <><h1 className="small-heading">Notifications</h1><p className="muted">Your latest 100 updates.</p>{!rows.length&&<div className="empty">You’re all caught up.</div>}{rows.map(row=><article className="panel split-actions" key={row.id}><div><span className="badge">{row.read_at?"Read":"New"}</span><h3>{row.title}</h3><small className="muted">{new Date(row.created_at).toLocaleDateString("en-US")}</small></div>{!row.read_at&&<form action={workspaceWrite}><input type="hidden" name="kind" value="notification"/><input type="hidden" name="id" value={row.id}/><SubmitButton className="button small secondary">Mark read</SubmitButton></form>}</article>)}</>;}

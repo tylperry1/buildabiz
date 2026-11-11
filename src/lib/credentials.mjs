@@ -1,0 +1,4 @@
+import {createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
+function keyBytes(key){if(typeof key!=='string'||!/^[a-f0-9]{64}$/i.test(key))throw new Error('Credential encryption is not configured');return Buffer.from(key,'hex');}
+export function encryptCredential(plaintext,key,context){const iv=randomBytes(12);const cipher=createCipheriv('aes-256-gcm',keyBytes(key),iv);cipher.setAAD(Buffer.from(context));const ciphertext=Buffer.concat([cipher.update(plaintext,'utf8'),cipher.final()]);return {ciphertext:ciphertext.toString('base64'),iv:iv.toString('hex'),tag:cipher.getAuthTag().toString('hex')};}
+export function decryptCredential(record,key,context){const decipher=createDecipheriv('aes-256-gcm',keyBytes(key),Buffer.from(record.iv,'hex'));decipher.setAAD(Buffer.from(context));decipher.setAuthTag(Buffer.from(record.tag,'hex'));return Buffer.concat([decipher.update(Buffer.from(record.ciphertext,'base64')),decipher.final()]).toString('utf8');}
